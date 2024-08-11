@@ -1,12 +1,20 @@
+ // CategorySlider.jsx
 import React from 'react';
 
-const CategorySlider = ({ categories }) => {
+function CategorySlider({ categories, selectedCategory, onSelectCategory }) {
   return (
     <div className="category-slider">
-      {categories && categories.map((category, index) => (
-        <button key={index}>{category}</button>
+      {categories.map((category) => (
+        <button
+          key={category}
+          className={category === selectedCategory ? 'selected' : ''}
+          onClick={() => onSelectCategory(category)}
+        >
+          {category}
+        </button>
       ))}
     </div>
   );
-};
+}
+
 export default CategorySlider;

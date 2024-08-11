@@ -11,10 +11,12 @@ dotenv.config({
   path: "./.env",
 });
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public', 'quiz-questions.json'));
+  res.sendFile(path.join(__dirname, '../public', 'index.html'));
 });
-
-app.use(cors())
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
 connectDB()
   .then(() => {
     app.on("errror", (error) => {

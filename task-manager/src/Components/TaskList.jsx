@@ -1,14 +1,20 @@
+ // TaskList.jsx
 import React from 'react';
-import TaskItem from './TaskItem.jsx';
+import TaskItem from './TaskItem';
 
-const TaskList = ({ tasks }) => {
+function TaskList({ tasks, onUpdateTask, onDeleteTask }) {
   return (
     <div className="task-list">
-      {tasks && tasks.map((task) => (
-        <TaskItem key={task.id} task={task} />
+      {tasks.map((task) => (
+        <TaskItem
+          key={task.id}
+          task={task}
+          onUpdate={onUpdateTask}
+          onDelete={onDeleteTask}
+        />
       ))}
     </div>
   );
-};
+}
 
 export default TaskList;
