@@ -1,18 +1,12 @@
-import React, { useContext } from 'react';
-import { TaskContext } from '../Context/TaskContext.jsx';
+import React from 'react';
 
-function CategorySlider() {
-  const { categories, setCategory } = useContext(TaskContext);
-
+const CategorySlider = ({ categories }) => {
   return (
     <div className="category-slider">
-      {categories.map((category) => (
-        <button key={category} onClick={() => setCategory(category)}>
-          {category}
-        </button>
+      {categories && categories.map((category, index) => (
+        <button key={index}>{category}</button>
       ))}
     </div>
   );
-}
-
+};
 export default CategorySlider;
