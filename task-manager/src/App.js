@@ -1,7 +1,6 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-
 
 function App() {
   const [tasks, setTasks] = useState([
@@ -70,14 +69,15 @@ function App() {
     priority: 'Low',
     deadline: '',
   });
-  const [isModalOpen, setIsModalOpen] = useState(false); 
-   // Fetch tasks from the backend
-   useEffect(() => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
     const fetchTasks = async () => {
       try {
         const response = await fetch('http://localhost:5000/tasks');
         const data = await response.json();
-        setTasks(data);
+        console.log('Fetched tasks:', data);
+        // Optionally merge or update state here if needed
       } catch (error) {
         console.error('Error fetching tasks:', error);
       }
@@ -93,8 +93,7 @@ function App() {
     }));
   };
 
-   
-  const handleTaskAdd = async (task) => {
+  const handleTaskAdd = async () => {
     if (newTask.title.trim() !== '') {
       try {
         const response = await fetch('http://localhost:5000/tasks', {
@@ -104,12 +103,13 @@ function App() {
           },
           body: JSON.stringify(newTask),
         });
-  
+
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-  
+
         const data = await response.json();
+        console.log('Added task:', data);
         setTasks((prevState) => [...prevState, data.task]);
         setNewTask({
           title: '',
@@ -124,8 +124,6 @@ function App() {
       }
     }
   };
-  
-  
 
   const handleTaskUpdate = (id, updatedTask) => {
     setTasks((prevState) =>
@@ -138,85 +136,128 @@ function App() {
   const handleTaskDelete = (id) => {
     setTasks((prevState) => prevState.filter((task) => task.id !== id));
   };
-  
 
+  const getPriorityClass = (priority) => {
+    switch (priority) {
+      case 'High':
+        return 'high-priority';
+      case 'Completed':
+        return 'completed-priority';
+      default:
+        return 'low-priority';
+    }
+  };
+  function TaskCard({ task, onUpdate, onDelete }) {
+  return (
+    <div className={`task-card ${getPriorityClass(task.priority)}`}>
+      <div className='inn'>
+        <h2>{task.title}</h2>
+        <button className='btn'>{task.priority}</button>
+      </div>
+      <p>{task.description}</p>
+      <p>Status: {task.status}</p>
+      <p>Priority: {task.priority}</p>
+      <p>Deadline: {task.deadline}</p>
+      <button onClick={() => onUpdate(task.id, { status: 'Done' })}>Mark as Done</button>
+      <button onClick={() => onDelete(task.id)}>Delete</button>
+    </div>
+  );
+}
   return (
     <div className="app-container">
       <div className="app-header">
         <div className="search-bar">
-        <i class="fa fa-search"></i>
+          <i className="fa fa-search"></i>
           <input type="text" placeholder="Search Project" />
-          <button className='btn'><i class="fa-solid fa-filter"></i> Filter</button>
+          <button className='btn'><i className="fa-solid fa-filter"></i> Filter</button>
         </div>
       </div>
       <div className="app-body">
         <div className="task-column">
           <div className="task1">
-          <button className='logoo1'><i className="fa-solid fa-flask"></i></button>
+            <button className='logoo1'><i className="fa-solid fa-flask"></i></button>
             <h2>Expired Tasks</h2>
-            <div className="task-count">5</div>
+            <div className="task-count">
+              {tasks.filter(task => new Date(task.deadline) < new Date() && task.status !== 'Done').length}
+            </div>
           </div>
           <div className="task2">
-            <button className='logoo2'> <i className="fa-solid fa-box"></i></button>
+            <button className='logoo2'><i className="fa-solid fa-box"></i></button>
             <h2>All Active Tasks</h2>
-            <div className="task-count">7</div>
+            <div className="task-count">{tasks.filter(task => task.status !== 'Done').length}</div>
           </div>
           <div className="task3">
-          <button className='logoo3'> <i className="fa-regular fa-clock"></i></button>
+            <button className='logoo3'><i className="fa-regular fa-clock"></i></button>
             <h2>Completed Tasks</h2>
-            <div className="task-count">2/7</div>
+            <div className="task-count">{tasks.filter(task => task.status === 'Done').length}</div>
           </div>
           <div className="plus">
             <button onClick={() => setIsModalOpen(true)}>
               <i className="fa-solid fa-plus"></i> Add to Task
             </button>
           </div>
-          </div>
-          <div className="task-column">
-            <h2>To Do</h2>
-            <div className="task-count">3</div>
-            {tasks
-              .filter((task) => task.status === 'To Do')
-              .map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onUpdate={handleTaskUpdate}
-                  onDelete={handleTaskDelete}
-                />
-              ))}
-          </div>
-          <div className="task-column">
-            <h2>On Progress</h2>
-            <div className="task-count">2</div>
-            {tasks
-              .filter((task) => task.status === 'On Progress')
-              .map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onUpdate={handleTaskUpdate}
-                  onDelete={handleTaskDelete}
-                />
-              ))}
-          </div>
-          <div className="task-column">
-            <h2>Done</h2>
-            <div className="task-count">2</div>
-            {tasks
-              .filter((task) => task.status === 'Done')
-              .map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onUpdate={handleTaskUpdate}
-                  onDelete={handleTaskDelete}
-                />
-              ))}
-          </div>
+        </div>
+        <div className="task-column">
+          <h2>To Do</h2>
+          <div className="task-count">{tasks.filter(task => task.status === 'To Do').length}</div>
+          {tasks
+            .filter((task) => task.status === 'To Do')
+            .map((task) => (
+              <div key={task.id} className={`task-card ${getPriorityClass(task.priority)}`}>
+                  <div className='inn'>
+                <h2>{task.title}</h2>
+                <button className='btn'>{task.priority}</button>
+                </div>
+                <p>{task.description}</p>
+                <p>Status: {task.status}</p>
+                <p>Priority: {task.priority}</p>
+                <p>Deadline: {task.deadline}</p>
+                <button onClick={() => handleTaskUpdate(task.id, { status: 'Done' })}>Mark as Done</button>
+                <button onClick={() => handleTaskDelete(task.id)}>Delete</button>
+              </div>
+            ))}
+        </div>
+        <div className="task-column">
+          <h2>On Progress</h2>
+          <div className="task-count">{tasks.filter(task => task.status === 'On Progress').length}</div>
+          {tasks
+            .filter((task) => task.status === 'On Progress')
+            .map((task) => (
+              <div key={task.id} className={`task-card ${getPriorityClass(task.priority)}`}>
+                <div className='inn'>
+                <h2>{task.title}</h2>
+                <button className='btn'>{task.priority}</button>
+                </div>
+                <p>{task.description}</p>
+                <p>Status: {task.status}</p>
+                <p>Priority: {task.priority}</p>
+                <p>Deadline: {task.deadline}</p>
+                <button onClick={() => handleTaskUpdate(task.id, { status: 'Done' })}>Mark as Done</button>
+                <button onClick={() => handleTaskDelete(task.id)}>Delete</button>
+              </div>
+            ))}
+        </div>
+        <div className="task-column">
+          <h2>Done</h2>
+          <div className="task-count">{tasks.filter(task => task.status === 'Done').length}</div>
+          {tasks
+            .filter((task) => task.status === 'Done')
+            .map((task) => (
+              <div key={task.id} className={`task-card ${getPriorityClass(task.priority)}`}>
+                <div className='inn'>
+                <h2>{task.title}</h2>
+                <button className='btn'>{task.priority}</button>
+                </div>
+                <p>{task.description}</p>
+                <p>Status: {task.status}</p>
+                <p>Priority: {task.priority}</p>
+                <p>Deadline: {task.deadline}</p>
+                <button onClick={() => handleTaskUpdate(task.id, { status: 'To Do' })}>Reopen</button>
+                <button onClick={() => handleTaskDelete(task.id)}>Delete</button>
+              </div>
+            ))}
+        </div>
       </div>
-      
-      {/* Add Task Modal */}
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
@@ -224,15 +265,15 @@ function App() {
             <input
               type="text"
               name="title"
-              placeholder="Title"
               value={newTask.title}
               onChange={handleInputChange}
+              placeholder="Title"
             />
             <textarea
               name="description"
-              placeholder="Description"
               value={newTask.description}
               onChange={handleInputChange}
+              placeholder="Description"
             />
             <select
               name="status"
@@ -250,6 +291,7 @@ function App() {
             >
               <option value="Low">Low</option>
               <option value="High">High</option>
+              <option value="Completed">Completed</option>
             </select>
             <input
               type="date"
@@ -257,124 +299,40 @@ function App() {
               value={newTask.deadline}
               onChange={handleInputChange}
             />
-            <div className="modal-actions">
-              <button onClick={handleTaskAdd}>Add Task</button>
-              <button onClick={() => setIsModalOpen(false)}>Cancel</button>
-            </div>
+            <button onClick={handleTaskAdd}>Add Task</button>
+            <button onClick={() => setIsModalOpen(false)}>Cancel</button>
           </div>
         </div>
       )}
     </div>
   );
 }
-
+const getPriorityClass = (priority) => {
+  switch (priority) {
+    case 'High':
+      return 'high-priority';
+    case 'Completed':
+      return 'completed-priority';
+    default:
+      return 'low-priority';
+  }
+};
 function TaskCard({ task, onUpdate, onDelete }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedTask, setEditedTask] = useState({
-    title: task.title,
-    description: task.description,
-    status: task.status,
-    priority: task.priority,
-    deadline: task.deadline,
-  });
-
-  const handleEditClick = () => {
-    setIsEditing(true);
-  };
-
-  const handleSaveClick = () => {
-    onUpdate(task.id, editedTask);
-    setIsEditing(false);
-  };
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setEditedTask((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
-
-  const handleDeleteClick = () => {
-    onDelete(task.id);
-  };
-  const getPriorityClass = (priority) => {
-    switch (priority) {
-      case 'High':
-        return 'priority-high';
-      case 'Low':
-        return 'priority-low';
-      case 'Completed':
-        return 'priority-completed';
-      default:
-        return '';
-    }
-  };
-
   return (
-    <div className="task-card">
-    {!isEditing ? (
-      <>
-        <div className="task-card-header">
-          <span className={`task-card-priority ${getPriorityClass(task.priority)}`}>
-            {task.priority}
-          </span>
-          <h3>{task.title}</h3>
-        </div>
-        <div className="task-card-body">
-          <p>{task.description}</p>
-          <p>Deadline: {task.deadline}</p>
-        </div>
-        <div className="task-card-footer">
-          <button onClick={handleEditClick}>Edit</button>
-          <button onClick={handleDeleteClick}>Delete</button>
-        </div>
-      </>
-    ) : (
-      <>
-        <div className="task-card-header">
-          <span className="task-card-priority">
-            <select
-              name="priority"
-              value={editedTask.priority}
-              onChange={handleInputChange}
-            >
-              <option value="Low">Low</option>
-              <option value="High">High</option>
-              <option value="Completed">Completed</option>
-            </select>
-          </span>
-          <h3>
-            <input
-              type="text"
-              name="title"
-              value={editedTask.title}
-              onChange={handleInputChange}
-            />
-          </h3>
-        </div>
-        <div className="task-card-body">
-          <textarea
-            name="description"
-            value={editedTask.description}
-            onChange={handleInputChange}
-          />
-          <p>Deadline:</p>
-          <input
-            type="date"
-            name="deadline"
-            value={editedTask.deadline}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="task-card-footer">
-          <button onClick={handleSaveClick}>Save</button>
-          <button onClick={() => setIsEditing(false)}>Cancel</button>
-        </div>
-      </>
-    )}
-  </div>
-);
+    <div className={`task-card ${getPriorityClass(task.priority)}`}>
+      <div className='inn'>
+        <h2>{task.title}</h2>
+        <button className='btn'>{task.priority}</button>
+      </div>
+      <p>{task.description}</p>
+      <p>Status: {task.status}</p>
+      <p>Priority: {task.priority}</p>
+      <p>Deadline: {task.deadline}</p>
+      <button onClick={() => onUpdate(task.id, { status: 'Done' })}>Mark as Done</button>
+      <button onClick={() => onDelete(task.id)}>Delete</button>
+    </div>
+  );
 }
+
 
 export default App;

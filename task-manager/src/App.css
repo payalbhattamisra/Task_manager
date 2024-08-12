@@ -16,6 +16,19 @@
   border-radius: 15px;
   box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.3);
 }
+.inn{
+  display: flex;
+  flex-direction: row;
+  gap:15px;
+}
+.inn>button{
+  width:65px;
+  height:20px;
+  font-size: 12px;
+  margin-top: 30px;
+  margin-left: 40px;
+  padding:4px;
+}
 
 .search-bar {
   display: flex;
@@ -150,19 +163,22 @@ color: #ddd;
   font-weight: bold;
 }
 
-.priority-low  {
-  background-color: orange;
-  color: white;
+ /* High Priority Button Style */
+.high-priority {
+  background-color: red; /* Red background for high priority */
+  color: white; /* White text color */
 }
 
-.priority-high {
-  background-color: red;
-  color: white;
+/* Completed Priority Button Style */
+.completed-priority {
+  background-color: green; /* Green background for completed priority */
+  color: white; /* White text color */
 }
 
-.priority-completed {
-  background-color: green;
-  color: white;
+/* Low Priority Button Style */
+.low-priority {
+  background-color: orange; /* Orange background for low priority */
+  color: white; /* White text color */
 }
 
 .task-card-body {
