@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import './App.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
@@ -71,6 +71,20 @@ function App() {
     deadline: '',
   });
   const [isModalOpen, setIsModalOpen] = useState(false); 
+   // Fetch tasks from the backend
+   useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/tasks');
+        const data = await response.json();
+        setTasks(data);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+      }
+    };
+    fetchTasks();
+  }, []);
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setNewTask((prevState) => ({
@@ -79,24 +93,39 @@ function App() {
     }));
   };
 
-  const handleTaskAdd = () => {
+   
+  const handleTaskAdd = async (task) => {
     if (newTask.title.trim() !== '') {
-      const newTaskId = tasks.length + 1;
-      const newTaskItem = {
-        id: newTaskId,
-        ...newTask,
-      };
-      setTasks((prevState) => [...prevState, newTaskItem]);
-      setNewTask({
-        title: '',
-        description: '',
-        status: 'To Do',
-        priority: 'Low',
-        deadline: '',
-      });
-      setIsModalOpen(false); 
+      try {
+        const response = await fetch('http://localhost:5000/tasks', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newTask),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+  
+        const data = await response.json();
+        setTasks((prevState) => [...prevState, data.task]);
+        setNewTask({
+          title: '',
+          description: '',
+          status: 'To Do',
+          priority: 'Low',
+          deadline: '',
+        });
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error('Error adding task:', error);
+      }
     }
   };
+  
+  
 
   const handleTaskUpdate = (id, updatedTask) => {
     setTasks((prevState) =>
@@ -123,17 +152,17 @@ function App() {
       <div className="app-body">
         <div className="task-column">
           <div className="task1">
-          <button className='logoo1'><i class="fa-solid fa-flask"></i></button>
+          <button className='logoo1'><i className="fa-solid fa-flask"></i></button>
             <h2>Expired Tasks</h2>
             <div className="task-count">5</div>
           </div>
           <div className="task2">
-            <button className='logoo2'> <i class="fa-solid fa-box"></i></button>
+            <button className='logoo2'> <i className="fa-solid fa-box"></i></button>
             <h2>All Active Tasks</h2>
             <div className="task-count">7</div>
           </div>
           <div className="task3">
-          <button className='logoo3'> <i class="fa-regular fa-clock"></i></button>
+          <button className='logoo3'> <i className="fa-regular fa-clock"></i></button>
             <h2>Completed Tasks</h2>
             <div className="task-count">2/7</div>
           </div>

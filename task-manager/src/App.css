@@ -136,6 +136,12 @@ color: #ddd;
   margin-bottom: 10px;
   gap:50px;
 }
+.task-card-header>input[type="text"] {
+  width: 50px;
+}
+
+
+
 
 .task-card-priority {
  
